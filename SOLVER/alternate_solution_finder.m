@@ -1,134 +1,9 @@
-function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
-    disp('Starting Modified distribution method ...')
-    iteration_count=0;
-    alternate_opt_flag = 0;
-    alt_x = zeros(m,n);
-    alt_z = 0;
-    
- for q=1:n*m
-     iteration_count=iteration_count+1;
-     
-  %% Construct the u-v variables
-    u=zeros(m,1);
-    v=zeros(1,n);
-    for i=1:m
-        u(i)=inf;
-    end
-    for j=1:n
-        v(j)=inf;
-    end
-    u(1)=0;
-   for i=1:1
-       for j=1:n
-           if x(i,j)>0 && u(i)<inf
-               
-               v(j)=c(i,j)-u(i);
-           end
-       end
-   end
-   for j=1:1
-       for i=1:m
-           if x(i,j)>0
-               iu=i;
-              if u(iu)~=inf
-               v(j)=c(i,j)-u(iu);
-              else
-                  if v(j)~=inf
-                      u(iu)=c(i,j)-v(j);
-                  end
-              end
-           end
-       end
-   end
- for k=1:m*n
-  for i=1:m
-       if u(i)~=inf
-          iu=i;
-          for j=1:n
-            if x(iu,j)>0 && u(iu)<inf
-             
-             v(j)=c(iu,j)-u(iu);
-            end
-          end
-       end
-  end
- for j=1:n
-     if v(j)~=inf
-         jv=j;
-         for i=1:m
-             if x(i,jv)>0 && v(jv)<inf
-                 u(i)=c(i,jv)-v(jv);
-             end
-         end
-     end
- end
- countu=0;
- countv=0;
- for i=1:m
-     if u(i)<inf
-      countu=countu+1;   
-     end
- end
- for j=1:n
-     if v(j)<inf
-         countv=countv+1;
-     end
- end
- if (countu==m) && (countv==n)
-     break
- end
- end
- 
- %disp(m)
- %disp(n)
- %disp(countu)
- %disp(countv)
- %disp(u)
- %disp(v)
- 
- %% Finding the non-basic cells
-  nonbasic_allocation=zeros(m,n);
-  for j=1:n
-      for i=1:m
-          if x(i,j)==0 
-              nonbasic_allocation(i,j)=u(i)+v(j)-c(i,j);
-              if nonbasic_allocation(i,j) == 0
-                  alternate_opt_flag = alternate_opt_flag + 1;
-                  alternate_opt_i(alternate_opt_flag) = i;
-                  alternate_opt_j(alternate_opt_flag) = j;
-              end
-          end
-      end
-  end
-  %% Search maximum positive of u+v-c(i,j) to reach a new basic variable
-  maxnonbasic_allocation=0;
-  for j=1:n
-      for i=1:m
-          if nonbasic_allocation(i,j)>=maxnonbasic_allocation
-              maxnonbasic_allocation=nonbasic_allocation(i,j);
-              imax=i;
-              jmax=j;
-          end
-      end
-  end
-    %% The objective function value
-     Z=0;
-       for j=1:n
-           for i=1:m
-               if x(i,j)>0
-                   Z=Z+x(i,j)*c(i,j);
-               end
-           end
-       end
-  iteration_count=iteration_count+1;
-  %% Control loop
-        if maxnonbasic_allocation==0
-           
-            break;
-        else
-           
-        end
-  %% Entering a new basic variable add into the basic variable matrix
+function [ xpath, Z ] = alternate_solution_finder( imax,jmax,x,c,m,n )
+    %% Entering a new basic variable add into the basic variable matrix
+   
+   alt_x = zeros(m,n);
+   alt_z = 0;
+   
    x1=zeros(m+1,n+1);
    x2=zeros(m+1,n+1);
      % duplicating values
@@ -184,6 +59,9 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
          end
       end
     end
+    
+    
+    
   % Eliminate the basic variables that has only one on each column
   for j=1:n
       if x2(m+1,j)==1
@@ -198,6 +76,9 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
           end
       end
   end
+  
+  
+  
    % Control the constructing loop path
   for j=1:n
     for i=1:m
@@ -253,6 +134,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
       end
     
     
+  
      % Control loop
      if  jneg1==jmax
        
@@ -275,8 +157,10 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
            
          end
      end
+     
    
-      % Construct the loop path
+   
+   % Construct the loop path
         x3=zeros(m,n);
        
            for j=1:n
@@ -309,6 +193,9 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
                end
             end
        end
+       
+       
+       
          %% Combine the new absolute loop path to the x matrix
         xpath=zeros(m,n);
            for j=1:n
@@ -328,54 +215,23 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
                   end
                end
             end 
+            
+            
+            
             %% The objective function
-   Zopt=0;
+   Z=0;
      for j=1:n
-         for i=1:m
-             if round(xpath(i,j))>0
-              Zopt=Zopt+round(xpath(i,j))*c(i,j);
+        for i=1:m
+          if xpath(i,j)>0
+             if xpath(i,j) == inf
+                xpath(i,j) = 0;
              end
-         end
+             Z=Z+c(i,j)*xpath(i,j);
+          end
+        end
      end
      
-     %% Check balance 
-         sumbal=0;
-         for j=1:n
-             for i=1:m
-                 if xpath(i,j)>0
-                    sumbal=sumbal+xpath(i,j);
-                 end
-             end
-         end
-             if sum_s==sumbal
-                 %disp('Balance');
-             else 
-              
-                 break;
-             end
-              %% Transfer x to xpath
-               for j=1:n
-                   for i=1:m
-                       x(i,j)=xpath(i,j);
-                   end
-               end
-               
-
- end
- Z=0;
- for j=1:n
-    for i=1:m
-      if x(i,j)>0
-         if x(i,j) == inf
-            x(i,j) = 0;
-         end
-         Z=Z+c(i,j)*x(i,j);
-      end
-    end
- end
- if alternate_opt_flag == 1
-     disp('Alternate optimum solution exists')
-     [alt_x,alt_z] = alternate_solution_finder(alternate_opt_i,alternate_opt_j,x,c,m,n);
- end
+     %disp(xpath)
+     %disp(Zopt)
 end
 
