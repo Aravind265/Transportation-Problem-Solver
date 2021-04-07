@@ -74,7 +74,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
          countv=countv+1;
      end
  end
- if (countu==m) && (countv==n)
+ if (countu==m) && (countv==n)        % if all the elements are found exit
      break
  end
  end
@@ -93,9 +93,9 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
           if x(i,j)==0 
               nonbasic_allocation(i,j)=u(i)+v(j)-c(i,j);
               if nonbasic_allocation(i,j) == 0
-                  alternate_opt_flag = alternate_opt_flag + 1;
-                  alternate_opt_i(alternate_opt_flag) = i;
-                  alternate_opt_j(alternate_opt_flag) = j;
+                  alternate_opt_flag = 1;
+                  alternate_opt_i = i;
+                  alternate_opt_j = j;
               end
           end
       end
@@ -122,7 +122,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
        end
   iteration_count=iteration_count+1;
   %% Control loop
-        if maxnonbasic_allocation==0
+        if maxnonbasic_allocation==0                     % if all nonallocation is negative or equal to zero optimum reached
            
             break;
         else
@@ -364,18 +364,20 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
  end
  Z=0;
  for j=1:n
-    for i=1:m
-      if x(i,j)>0
+ for i=1:m
+     if x(i,j)>0
          if x(i,j) == inf
             x(i,j) = 0;
          end
          Z=Z+c(i,j)*x(i,j);
-      end
+         if x(i,j) == 0
+            x(i,j) = inf;
+        end
     end
+ end
  end
  if alternate_opt_flag == 1
      disp('Alternate optimum solution exists')
      [alt_x,alt_z] = alternate_solution_finder(alternate_opt_i,alternate_opt_j,x,c,m,n);
  end
 end
-

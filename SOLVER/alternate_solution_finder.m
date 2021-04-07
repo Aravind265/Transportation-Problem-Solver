@@ -1,6 +1,7 @@
 function [ xpath, Z ] = alternate_solution_finder( imax,jmax,x,c,m,n )
     %% Entering a new basic variable add into the basic variable matrix
    
+    disp('Finding alternate optimum allocation ...')
    alt_x = zeros(m,n);
    alt_z = 0;
    

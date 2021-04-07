@@ -83,6 +83,10 @@ fprintf('The optimum solution value : %d \n', Z)
 disp('--- The allocation matrix : ---')
 disp(x)
 
+if degen_flag == 1
+    disp('--- NOTE : inf here refers to Epsilon -> a negligable amount of allocation ---')
+end
+
 if alternate_opt_flag == 1
     disp('--- The alternate allocation matrix ---')
     disp(alt_x)
