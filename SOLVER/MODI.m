@@ -100,7 +100,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
           end
       end
   end
-  %% Search maximum positive of u+v-c(i,j) to reach a new basic variable
+  %% Search maximum positive of u+v-c(i,j) to find leaving variable
   maxnonbasic_allocation=0;
   for j=1:n
       for i=1:m
@@ -167,7 +167,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
      x2(i,n+1)=countrow;
  end
  %% Construct loop
-  % Eliminate the basic variables that has only one on each row 
+  % Eliminating the basic variables that has only one on each row 
   iterationloop=0;
   for k=1:m
       iterationloop=iterationloop+1;
@@ -221,7 +221,7 @@ function [ x,Z,alt_x,alt_z,alternate_opt_flag ] = MODI(m,n,x,c,sum_s)
                  x2(imax,jneg)=(-1)*x2(imax,jneg);
                  x2(m+1,jneg)=1;
                  x2(imax,n+1)=1;
-                   for i=1:m
+                   for i=1:m                                    % finding the position of the basic variable in the same row
                        if (x2(i,jneg)>0 && x2(m+1,jneg)==1)
                            ineg=i;
                           
