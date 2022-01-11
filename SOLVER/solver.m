@@ -96,3 +96,5 @@ if alternate_opt_flag == 1
     disp('The optimum value of the alternate allocation matrix :')
     disp(alt_z)
 end
+
+// End
